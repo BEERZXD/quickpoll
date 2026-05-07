@@ -134,7 +134,7 @@ All production load-test rooms reached the expected final voter count and were s
 - Vercel production URL: `https://beerquickpoll.vercel.app`
 - Vercel deployment ID: `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT`
 - Cloudflare Worker URL: `https://quickpoll-realtime.beerza4192.workers.dev`
-- Cloudflare Worker version ID: `a883ecdf-77a7-4209-99b1-4cc4c66829a6`
+- Cloudflare Worker version ID: `d5812beb-03a1-4e31-afd6-dc4cf376a5f7`
 - Vercel deploys the Next.js app from GitHub.
 - GitHub Actions can deploy the Cloudflare Worker when these secrets are configured:
   - `CLOUDFLARE_API_TOKEN`
@@ -197,6 +197,8 @@ On May 7, 2026, the host stopped-state removal of `ดูผลโหวต` was
 On May 7, 2026, the follow-up and choice-editor UI were rechecked locally with `agent-browser`: the stopped-host new-question form showed only question and choice fields, starting it kept `Original Title`, the create form exposed per-choice delete buttons after adding a third option, deleting a middle option kept two choices, and long unbroken title/question/choice text produced no horizontal page overflow on host or voter pages.
 
 On May 7, 2026, Vercel production deploy `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT` was inspected as `Ready`, and `agent-browser` verified the full production flow on `https://beerquickpoll.vercel.app`: create a poll, join as a voter, cast a vote, see live host results update, stop the poll, and see voter choices disabled after closure.
+
+On May 8, 2026, Cloudflare Worker version `d5812beb-03a1-4e31-afd6-dc4cf376a5f7` was deployed after production was found to be using the old Stop Poll behavior that deleted the room. `agent-browser` verified production room `862320`: after Stop Poll, the host header replaced `หยุดโพล` with `กลับหน้าแรก` and `ถามคำถามใหม่`, and `GET /polls/862320` returned a stopped room state with `active: false` instead of a closed-room error.
 
 On May 7, 2026, the host mobile stopped-header layout and QR share-link copy text were covered with `npm.cmd test -- tests/host-stop-ui.test.ts`, `npm.cmd test -- tests/copy.test.ts`, the full `npm.cmd test` suite, `npm.cmd run lint`, `npx.cmd tsc --noEmit`, and `npm.cmd run build`. A local mobile `agent-browser` check on room `169067` verified that after Stop Poll the host header uses a column layout with a 305 px title width, shows only `กลับหน้าแรก` and `ถามคำถามใหม่` in the stopped header, renders the QR copy-link button, and copies `http://127.0.0.1:3001/poll/169067` with the `คัดลอกลิงก์แล้ว` button state.
 
