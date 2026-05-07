@@ -18,6 +18,6 @@
     }
   ],
   "vars": {
-    "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001"
+    "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001,https://beerquickpoll.vercel.app,https://quickpoll-lovat-seven.vercel.app,https://quickpoll-beerzxds-projects.vercel.app,https://quickpoll-beerzxd-beerzxds-projects.vercel.app"
   }
 }

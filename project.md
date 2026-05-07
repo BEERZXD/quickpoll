@@ -112,8 +112,10 @@ These are local development numbers, not production Cloudflare guarantees. They 
 ## Deployment
 
 - GitHub repository: `https://github.com/BEERZXD/quickpoll`
-- Vercel production URL: `https://quickpoll-lovat-seven.vercel.app`
-- Vercel deployment ID: `dpl_kjTnzuDA1dtFiDTWwoYLWWLWrbpZ`
+- Vercel production URL: `https://beerquickpoll.vercel.app`
+- Vercel deployment ID: `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT`
+- Cloudflare Worker URL: `https://quickpoll-realtime.beerza4192.workers.dev`
+- Cloudflare Worker version ID: `a883ecdf-77a7-4209-99b1-4cc4c66829a6`
 - Vercel deploys the Next.js app from GitHub.
 - GitHub Actions can deploy the Cloudflare Worker when these secrets are configured:
   - `CLOUDFLARE_API_TOKEN`
@@ -121,7 +123,7 @@ These are local development numbers, not production Cloudflare guarantees. They 
 - Update `ALLOWED_ORIGINS` in `wrangler.jsonc` or Cloudflare Worker settings to include the Vercel production URL.
 - Set Vercel `NEXT_PUBLIC_REALTIME_URL` to the Worker URL, for example `https://quickpoll-realtime.<account>.workers.dev`.
 - `wrangler.jsonc` uses a past supported compatibility date so local Wrangler can start reliably.
-- The Vercel frontend is deployed, but production poll creation needs the Cloudflare Worker deployed and `NEXT_PUBLIC_REALTIME_URL` configured. Local Wrangler was not authenticated on May 7, 2026, so the Worker could not be deployed from this machine yet.
+- Production Vercel has `NEXT_PUBLIC_REALTIME_URL=https://quickpoll-realtime.beerza4192.workers.dev`.
 
 ## Routes
 
@@ -166,4 +168,4 @@ On May 7, 2026, the local browser flow was rechecked on both `http://localhost:3
 
 Closed-poll voter UI has been verified with `agent-browser`: after the host clicks Stop Poll, the voter choice buttons and reset/clear button are disabled.
 
-On May 7, 2026, Vercel production deploy `dpl_kjTnzuDA1dtFiDTWwoYLWWLWrbpZ` was inspected as `Ready`, and `agent-browser` verified that `https://quickpoll-lovat-seven.vercel.app` loads the home page and `/create` route with no console or page errors. Production poll creation was not fully functional yet because the Cloudflare Worker URL was not configured in Vercel.
+On May 7, 2026, Vercel production deploy `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT` was inspected as `Ready`, and `agent-browser` verified the full production flow on `https://beerquickpoll.vercel.app`: create a poll, join as a voter, cast a vote, see live host results update, stop the poll, and see voter choices disabled after closure.
