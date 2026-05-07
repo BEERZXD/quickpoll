@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import { appCopy } from "@/lib/copy";
+import { SiteFooter } from "./SiteFooter";
 import "./globals.css";
 
 const thaiSans = Noto_Sans_Thai({
@@ -29,7 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={appCopy.language} className={`${thaiSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

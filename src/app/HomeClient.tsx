@@ -64,11 +64,11 @@ export function HomeClient({ initialMode }: HomeClientProps) {
 
   return (
     <main className="stage-shell">
-      <div className="stage-grid grid min-h-[calc(100vh-48px)] content-center">
+      <div className="stage-grid grid min-h-[calc(100dvh-96px)] content-center">
         <section className="glass-panel mx-auto w-full max-w-2xl rounded-lg p-5 sm:p-7">
-          <div className="mb-7 flex items-center gap-3">
-            <div className="grid size-12 place-items-center rounded-lg bg-[#ffcc30] text-[#111114]">
-              <Radio size={26} strokeWidth={2.8} />
+          <div className="mb-5 flex items-center gap-3">
+            <div className="grid size-10 place-items-center rounded-lg bg-[#ffcc30] text-[#111114] sm:size-12">
+              <Radio size={24} strokeWidth={2.8} />
             </div>
             <div>
               <h1 className="text-3xl font-black tracking-normal sm:text-5xl">{appCopy.productName}</h1>
@@ -100,29 +100,29 @@ export function HomeClient({ initialMode }: HomeClientProps) {
           {mode === "create" ? (
             <div>
               <Link
-                className="event-button mb-5 rounded-md bg-white/12 text-white no-underline"
+                className="event-button mb-3 rounded-md bg-white/12 text-white no-underline"
                 href="/"
                 onClick={(event) => chooseMode("start", event)}
               >
                 <ArrowLeft size={18} />
                 {copy.backHome}
               </Link>
-              <h2 className="mb-5 text-2xl font-black">{copy.createTitle}</h2>
-              <form className="grid gap-4" onSubmit={createPoll}>
-                <label className="grid gap-2">
+              <h2 className="mb-3 text-2xl font-black">{copy.createTitle}</h2>
+              <form className="grid gap-3" onSubmit={createPoll}>
+                <label className="grid gap-1.5">
                   <span className="text-sm font-bold text-[#ffcc30]">{copy.titleLabel}</span>
                   <input
-                    className="focus-ring rounded-md border border-white/15 bg-white/8 px-4 py-3 text-lg font-bold text-white"
+                    className="focus-ring rounded-md border border-white/15 bg-white/8 px-3 py-2.5 text-base font-bold text-white sm:text-lg"
                     maxLength={80}
                     placeholder={copy.titlePlaceholder}
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
                   />
                 </label>
-                <label className="grid gap-2">
+                <label className="grid gap-1.5">
                   <span className="text-sm font-bold text-[#ff7ab6]">{copy.questionLabel}</span>
                   <input
-                    className="focus-ring rounded-md border border-white/15 bg-white/8 px-4 py-3 text-lg font-bold text-white"
+                    className="focus-ring rounded-md border border-white/15 bg-white/8 px-3 py-2.5 text-base font-bold text-white sm:text-lg"
                     maxLength={140}
                     placeholder={copy.questionPlaceholder}
                     required
@@ -130,13 +130,13 @@ export function HomeClient({ initialMode }: HomeClientProps) {
                     onChange={(event) => setQuestion(event.target.value)}
                   />
                 </label>
-                <div className="grid gap-2">
+                <div className="grid gap-1.5">
                   <span className="text-sm font-bold text-[#7cf36e]">{copy.choicesLabel}</span>
-                  <div className="grid gap-2">
+                  <div className="grid gap-1.5">
                     {options.map((option, index) => (
-                      <div className="flex gap-2" key={index}>
+                      <div className="flex min-w-0 gap-2" key={index}>
                         <input
-                          className="focus-ring min-w-0 flex-1 rounded-md border border-white/15 bg-white/8 px-4 py-3 text-white"
+                          className="focus-ring min-w-0 flex-1 rounded-md border border-white/15 bg-white/8 px-3 py-2.5 text-white"
                           maxLength={80}
                           placeholder={copy.choicePlaceholder(index + 1)}
                           required
@@ -174,7 +174,7 @@ export function HomeClient({ initialMode }: HomeClientProps) {
                 </div>
 
                 <button
-                  className="event-button mt-2 rounded-md bg-[#22d3ee] text-[#071013] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="event-button rounded-md bg-[#22d3ee] text-[#071013] disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={!canCreate || busy}
                   type="submit"
                 >

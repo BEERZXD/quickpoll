@@ -211,26 +211,28 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
 
   return (
     <main className="stage-shell">
-      <div className="stage-grid grid min-h-[calc(100vh-48px)] gap-5 xl:grid-cols-[1fr_320px]">
+      <div className="stage-grid grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="glass-panel flex min-h-[560px] flex-col rounded-lg p-5 sm:p-8">
           <header className={headerLayout.header}>
             <div className={headerLayout.titleArea}>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-[#22d3ee]/15 px-3 py-2 text-sm font-black text-[#b7f7ff]">
+              <div className="mb-3 inline-flex whitespace-nowrap items-center gap-2 rounded-md bg-[#22d3ee]/15 px-3 py-2 text-sm font-black text-[#b7f7ff]">
                 <Radio size={18} />
                 {statusLabel(status)}
               </div>
-              <h1 className="poll-text-wrap max-w-[760px] text-3xl font-black tracking-normal sm:text-6xl">
+              <h1 className="poll-text-wrap w-full text-3xl font-black tracking-normal sm:text-6xl">
                 {state?.poll.title ?? copy.connectingTitle}
               </h1>
-              <p className="poll-text-wrap mt-3 max-w-[760px] text-xl font-bold text-white/78 sm:text-3xl">
+              <p className="poll-text-wrap mt-3 w-full text-xl font-bold text-white/78 sm:text-3xl">
                 {state?.poll.question ?? copy.warmingUp}
               </p>
             </div>
             {state?.active ? (
-              <button className="event-button rounded-md bg-[#ff4d6d] text-white" type="button" onClick={stopPoll}>
-                <OctagonX size={22} />
-                {copy.stopPoll}
-              </button>
+              <div className={headerLayout.actions}>
+                <button className="event-button rounded-md bg-[#ff4d6d] text-white" type="button" onClick={stopPoll}>
+                  <OctagonX size={22} />
+                  {copy.stopPoll}
+                </button>
+              </div>
             ) : state ? (
               <div className={headerLayout.actions}>
                 <Link className="event-button rounded-md bg-white/12 text-white no-underline" href="/">
@@ -250,7 +252,7 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
           </header>
 
           {showNewQuestionForm ? (
-            <form className="mt-8 grid max-w-2xl gap-3" onSubmit={startAnotherPoll}>
+            <form className="mt-6 grid max-w-2xl gap-3" onSubmit={startAnotherPoll}>
               <h2 className="text-xl font-black">{copy.askAgain}</h2>
               <input
                 className="focus-ring rounded-md border border-white/15 bg-white/8 px-3 py-2 font-bold text-white"
@@ -262,7 +264,7 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
               />
               <div className="grid gap-2">
                 {nextOptions.map((option, index) => (
-                  <div className="flex gap-2" key={index}>
+                  <div className="flex min-w-0 gap-2" key={index}>
                     <input
                       className="focus-ring min-w-0 flex-1 rounded-md border border-white/15 bg-white/8 px-3 py-2 text-white"
                       maxLength={80}
@@ -309,28 +311,28 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
               </button>
             </form>
           ) : showHostResults ? (
-            <div className="mt-8 grid flex-1 content-end gap-4">
+            <div className="mt-6 grid flex-1 content-start gap-4">
               {state?.poll.options.map((option, index) => {
                 const count = state.results.find((result) => result.optionId === option.id)?.count ?? 0;
                 const percent = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
                 const isWinner = winningOptionIds.has(option.id);
                 return (
                   <div
-                    className={`result-row rounded-md border p-3 ${
+                    className={`result-row overflow-hidden rounded-md border p-3 ${
                       isWinner
                         ? "border-[#ffcc30]/70 bg-[#ffcc30]/10 shadow-[0_0_0_1px_rgba(255,204,48,0.18)]"
                         : "border-transparent"
                     }`}
                     key={option.id}
                   >
-                    <div className="mb-2 flex items-end justify-between gap-3">
+                    <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
                       <div className="min-w-0">
                         <div className="poll-text-wrap text-xl font-black sm:text-3xl">{option.text}</div>
                         {isWinner ? (
                           <div className="mt-1 text-sm font-black text-[#ffcc30]">{copy.winnerLabel}</div>
                         ) : null}
                       </div>
-                      <div className="font-mono text-2xl font-black text-[#ffcc30] sm:text-5xl">{count}</div>
+                      <div className="shrink-0 font-mono text-2xl font-black text-[#ffcc30] sm:text-5xl">{count}</div>
                     </div>
                     <div className="h-7 overflow-hidden rounded-md bg-white/10 sm:h-10">
                       <div
@@ -353,7 +355,7 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
           )}
         </section>
 
-        <aside className="grid gap-5">
+        <aside className="grid auto-rows-max content-start gap-5">
           <section className="glass-panel rounded-lg p-5">
             <div className="flex items-center justify-between gap-3">
               <div>

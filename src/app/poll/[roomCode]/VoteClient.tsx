@@ -161,21 +161,23 @@ export function VoteClient({ roomCode }: VoteClientProps) {
 
   return (
     <main className="stage-shell">
-      <section className="stage-grid grid min-h-[calc(100vh-48px)] content-center">
-        <div className="glass-panel rounded-lg p-5 sm:p-7">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3">
+      <section className="stage-grid grid min-h-[calc(100dvh-96px)] content-center">
+        <div className="glass-panel overflow-hidden rounded-lg p-5 sm:p-7">
+          <div className="mb-6 grid gap-4">
+            <div className="flex items-start justify-between gap-3">
               <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-[#ffcc30] text-[#111114]">
                 <Radio size={23} strokeWidth={2.8} />
               </div>
-              <div className="min-w-0">
-                <p className="font-mono text-sm font-black text-[#b7f7ff]">{roomCode}</p>
-                <h1 className="poll-text-wrap text-2xl font-black sm:text-4xl">
-                  {state?.poll.title ?? copy.fallbackTitle}
-                </h1>
-              </div>
+              <span className="shrink-0 whitespace-nowrap rounded-md bg-white/10 px-3 py-2 text-sm font-black">
+                {statusLabel(status)}
+              </span>
             </div>
-            <span className="rounded-md bg-white/10 px-3 py-2 text-sm font-black">{statusLabel(status)}</span>
+            <div className="min-w-0">
+              <p className="font-mono text-sm font-black text-[#b7f7ff]">{roomCode}</p>
+              <h1 className="poll-text-wrap text-2xl font-black sm:text-4xl">
+                {state?.poll.title ?? copy.fallbackTitle}
+              </h1>
+            </div>
           </div>
 
           <h2 className="poll-text-wrap text-2xl font-black text-white/88 sm:text-5xl">
@@ -191,21 +193,21 @@ export function VoteClient({ roomCode }: VoteClientProps) {
                 const isWinner = winningOptionIds.has(option.id);
                 return (
                   <div
-                    className={`result-row rounded-md border p-3 ${
+                    className={`result-row overflow-hidden rounded-md border p-3 ${
                       isWinner
                         ? "border-[#ffcc30]/70 bg-[#ffcc30]/10 shadow-[0_0_0_1px_rgba(255,204,48,0.18)]"
                         : "border-transparent"
                     }`}
                     key={option.id}
                   >
-                    <div className="mb-2 flex items-end justify-between gap-3">
+                    <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
                       <div className="min-w-0">
                         <div className="poll-text-wrap text-xl font-black sm:text-3xl">{option.text}</div>
                         {isWinner ? (
                           <div className="mt-1 text-sm font-black text-[#ffcc30]">{copy.winnerLabel}</div>
                         ) : null}
                       </div>
-                      <div className="font-mono text-2xl font-black text-[#ffcc30]">{count}</div>
+                      <div className="shrink-0 font-mono text-2xl font-black text-[#ffcc30]">{count}</div>
                     </div>
                     <div className="h-7 overflow-hidden rounded-md bg-white/10">
                       <div

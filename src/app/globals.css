@@ -29,6 +29,8 @@ body {
     var(--background);
   color: var(--foreground);
   font-family: var(--font-thai-sans), "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 button,
@@ -41,8 +43,8 @@ button {
 }
 
 .stage-shell {
-  min-height: 100vh;
-  padding: 24px;
+  min-height: 100dvh;
+  padding: 24px 24px 72px;
 }
 
 .stage-grid {
@@ -111,6 +113,18 @@ button {
 
 @media (max-width: 720px) {
   .stage-shell {
-    padding: 14px;
+    padding: 14px 14px 72px;
+  }
+}
+
+@media (max-height: 760px) {
+  .stage-shell {
+    padding-bottom: 72px;
+    padding-top: 10px;
+  }
+
+  .event-button {
+    min-height: 40px;
+    padding-inline: 14px;
   }
 }

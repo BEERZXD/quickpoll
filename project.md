@@ -36,6 +36,8 @@ Quick Poll is a no-login realtime poll maker. The website is designed for Vercel
 - `Geist Mono` is used only for room codes, numbers, and technical text.
 - Main UI copy lives in `src/lib/copy.ts`.
 - The browser tab favicon is `src/app/icon.svg`, using the Quick Poll dark, cyan, and yellow palette.
+- Every page uses a fixed bottom credit pill from `src/app/SiteFooter.tsx` with `Made with ❤️ by _bxxr.t`; the handle links to Instagram. Long pages use normal document-level vertical scrolling instead of nested panel scrollbars.
+- Host and voter poll headers keep action/status controls in their own row above long poll text, so titles and questions wrap across the real panel width. The closed status label stays on one line, and result rows keep vote counts inside the panel beside long labels.
 - Worker error messages that users can see are translated to Thai.
 - Poll titles, questions, and choices use a shared wrapping style so long text stays inside the screen and its panel.
 
@@ -151,7 +153,7 @@ All production load-test rooms reached the expected final voter count and were s
 - The create form does not require `ชื่อโพล`; a blank title becomes `Poll DD/MM/YYYY : HH:mm`. `คำถาม` is required, and visible `ตัวเลือก` fields are required with a 2 to 8 option limit. Once more than two choices exist, each choice field has its own delete button, while at least two fields always remain.
 - `/join` opens the room-code join form.
 - The first two choices are real route-backed links so they still navigate if client hydration is delayed, then enhance into instant in-page transitions after React loads.
-- `/host/[roomCode]?token=...` is the private admin dashboard. After Stop Poll, it shows action buttons in the header where Stop Poll was, keeps frozen choices visible, and highlights the winning choice. On mobile, stopped-state header actions stack below the title so default poll titles do not collapse into one-character columns. New question opens a question-and-choice-only form in the main panel and reuses the old title. The QR side panel also has a copy-link button for the voter join URL.
+- `/host/[roomCode]?token=...` is the private admin dashboard. After Stop Poll, it shows action buttons in a full-width header row above the title, keeps frozen choices visible, and highlights the winning choice. New question opens a question-and-choice-only form in the main panel and reuses the old title. The QR side panel content sizes to its QR/link controls and also has a copy-link button for the voter join URL.
 - `/poll/[roomCode]` is the voter page used by QR codes and room entry. After Stop Poll, it shows final results, highlights winning choices, and disables voting until the admin starts another question.
 
 ## Realtime Protocol
@@ -203,3 +205,5 @@ On May 8, 2026, Cloudflare Worker version `d5812beb-03a1-4e31-afd6-dc4cf376a5f7`
 On May 7, 2026, the host mobile stopped-header layout and QR share-link copy text were covered with `npm.cmd test -- tests/host-stop-ui.test.ts`, `npm.cmd test -- tests/copy.test.ts`, the full `npm.cmd test` suite, `npm.cmd run lint`, `npx.cmd tsc --noEmit`, and `npm.cmd run build`. A local mobile `agent-browser` check on room `169067` verified that after Stop Poll the host header uses a column layout with a 305 px title width, shows only `กลับหน้าแรก` and `ถามคำถามใหม่` in the stopped header, renders the QR copy-link button, and copies `http://127.0.0.1:3001/poll/169067` with the `คัดลอกลิงก์แล้ว` button state.
 
 On May 7, 2026, the tab favicon was added as `src/app/icon.svg` and covered with `npm.cmd test -- tests/app-icon.test.ts`.
+
+On May 8, 2026, long-text host and voter overflow was rechecked with `npm.cmd test`, `npm.cmd run lint`, `npx.cmd tsc --noEmit`, and `npm.cmd run build`. `agent-browser` verified local room `589572` at 320 px wide with zero horizontal overflow on both stopped host and voter pages; the stopped action/status row stayed above the title, `ปิดแล้ว` stayed on one line, result counts stayed inside their panels, and the 1440 px host sidebar cards measured to their own QR/voter content heights instead of filling the whole right column.

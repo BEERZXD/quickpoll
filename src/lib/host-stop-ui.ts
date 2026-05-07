@@ -23,7 +23,6 @@ export function shouldShowHostNewQuestionForm({
 }
 
 export function hostHeaderLayoutClasses({
-  active,
   hasState,
 }: {
   active: boolean;
@@ -33,11 +32,11 @@ export function hostHeaderLayoutClasses({
   titleArea: string;
   actions: string;
 } {
-  if (!active && hasState) {
+  if (hasState) {
     return {
-      header: "flex flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:justify-between",
-      titleArea: "min-w-0 w-full sm:flex-1",
-      actions: "flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end",
+      header: "flex flex-col items-stretch gap-4",
+      titleArea: "min-w-0 w-full",
+      actions: "order-first flex w-full flex-wrap justify-end gap-2",
     };
   }
 

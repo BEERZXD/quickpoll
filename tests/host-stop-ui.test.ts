@@ -24,14 +24,28 @@ describe("host stopped poll UI", () => {
     expect(shouldShowHostNewQuestionForm({ active: false, stoppedView: null })).toBe(false);
   });
 
-  it("stacks stopped host header content on mobile so the title keeps full width", () => {
+  it("keeps stopped host actions above the title so the title keeps full panel width", () => {
     const layout = hostHeaderLayoutClasses({ active: false, hasState: true });
 
     expect(layout.header).toContain("flex-col");
-    expect(layout.header).toContain("sm:flex-row");
+    expect(layout.header).not.toContain("sm:flex-row");
     expect(layout.titleArea).toContain("w-full");
+    expect(layout.actions).toContain("order-first");
     expect(layout.actions).toContain("w-full");
-    expect(layout.actions).toContain("sm:w-auto");
+    expect(layout.actions).toContain("justify-end");
+    expect(layout.actions).not.toContain("sm:w-auto");
+  });
+
+  it("keeps active host actions above the title so the stop button does not squeeze long titles", () => {
+    const layout = hostHeaderLayoutClasses({ active: true, hasState: true });
+
+    expect(layout.header).toContain("flex-col");
+    expect(layout.header).not.toContain("sm:flex-row");
+    expect(layout.titleArea).toContain("w-full");
+    expect(layout.actions).toContain("order-first");
+    expect(layout.actions).toContain("w-full");
+    expect(layout.actions).toContain("justify-end");
+    expect(layout.actions).not.toContain("sm:w-auto");
   });
 
   it("highlights only the highest stopped-poll choices when votes exist", () => {
