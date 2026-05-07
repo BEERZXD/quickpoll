@@ -152,7 +152,7 @@ describe("PollRoomCore", () => {
     expect(() => room.joinVoter("tab-1000")).toThrow("Room is full");
   });
 
-  it("deletes the room immediately when the host stops the poll", () => {
+  it("stops voting while preserving final results", () => {
     const room = PollRoomCore.create({ poll, hostToken: "host-secret" });
 
     room.joinHost("host-secret");
@@ -160,9 +160,52 @@ describe("PollRoomCore", () => {
     room.vote("tab-1", "yes");
     const event = room.stopPoll("host-secret");
 
-    expect(event).toEqual({ type: "roomClosed", reason: "stopped" });
-    expect(room.snapshot()).toMatchObject({ active: false, voterCount: 0 });
-    expect(() => room.joinVoter("late-tab")).toThrow("Room is closed");
+    expect(event).toEqual({ type: "pollStopped" });
+    expect(room.snapshot()).toMatchObject({
+      active: false,
+      voterCount: 1,
+      results: [
+        { optionId: "yes", count: 1 },
+        { optionId: "no", count: 0 },
+      ],
+    });
+    expect(() => room.vote("tab-1", "no")).toThrow("Room is closed");
+  });
+
+  it("starts another poll in the same room and keeps connected voters", () => {
+    const nextPoll = {
+      title: "Follow up",
+      question: "Next step?",
+      options: [
+        { id: "option-1", text: "Build" },
+        { id: "option-2", text: "Wait" },
+      ],
+    };
+    const room = PollRoomCore.create({ poll, hostToken: "host-secret" });
+
+    room.joinHost("host-secret");
+    room.joinVoter("tab-1");
+    room.joinVoter("tab-2");
+    room.vote("tab-1", "yes");
+    room.stopPoll("host-secret");
+    const event = room.startPoll("host-secret", nextPoll);
+
+    expect(event).toEqual({ type: "pollStarted" });
+    expect(room.snapshot()).toMatchObject({
+      active: true,
+      poll: nextPoll,
+      voterCount: 2,
+      results: [
+        { optionId: "option-1", count: 0 },
+        { optionId: "option-2", count: 0 },
+      ],
+    });
+
+    expect(room.vote("tab-1", "option-2")).toBe(true);
+    expect(room.snapshot().results).toEqual([
+      { optionId: "option-1", count: 0 },
+      { optionId: "option-2", count: 1 },
+    ]);
   });
 
   it("starts a 30 second grace timer when the host disconnects and cancels it on reconnect", () => {

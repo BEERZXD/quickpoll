@@ -2,35 +2,30 @@
 
 import { FormEvent, MouseEvent, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, DoorOpen, Plus, Radio, Send } from "lucide-react";
+import { ArrowLeft, DoorOpen, Plus, Radio, Send, X } from "lucide-react";
 import type { CreatePollResponse } from "@/lib/types";
 import { fetchJson, realtimeHttpUrl } from "@/lib/poll-api";
 import { appCopy } from "@/lib/copy";
 import { homeModePath, type HomeMode } from "@/lib/home-mode";
+import { buildPollPayload, canSubmitPollForm, removePollOptionAt } from "@/lib/poll-form";
 
 type HomeClientProps = {
   initialMode: HomeMode;
 };
 
 const copy = appCopy.home;
-const defaultOptions = [...copy.defaultOptions];
+const emptyOptions = ["", ""];
 
 export function HomeClient({ initialMode }: HomeClientProps) {
   const [mode, setMode] = useState<HomeMode>(initialMode);
-  const [title, setTitle] = useState<string>(copy.defaultTitle);
-  const [question, setQuestion] = useState<string>(copy.defaultQuestion);
-  const [options, setOptions] = useState<string[]>(defaultOptions);
+  const [title, setTitle] = useState<string>("");
+  const [question, setQuestion] = useState<string>("");
+  const [options, setOptions] = useState<string[]>(emptyOptions);
   const [roomCode, setRoomCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const canCreate = useMemo(
-    () =>
-      title.trim().length > 0 &&
-      question.trim().length > 0 &&
-      options.filter((option) => option.trim()).length >= 2,
-    [options, question, title],
-  );
+  const canCreate = useMemo(() => canSubmitPollForm({ title, question, options }), [options, question, title]);
 
   async function createPoll(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,11 +36,7 @@ export function HomeClient({ initialMode }: HomeClientProps) {
       const result = await fetchJson<CreatePollResponse>(realtimeHttpUrl("/polls"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          question,
-          options: options.filter((option) => option.trim()),
-        }),
+        body: JSON.stringify(buildPollPayload({ title, question, options })),
       });
       window.location.assign(result.hostUrl);
     } catch (caught) {
@@ -123,6 +114,7 @@ export function HomeClient({ initialMode }: HomeClientProps) {
                   <input
                     className="focus-ring rounded-md border border-white/15 bg-white/8 px-4 py-3 text-lg font-bold text-white"
                     maxLength={80}
+                    placeholder={copy.titlePlaceholder}
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
                   />
@@ -132,6 +124,8 @@ export function HomeClient({ initialMode }: HomeClientProps) {
                   <input
                     className="focus-ring rounded-md border border-white/15 bg-white/8 px-4 py-3 text-lg font-bold text-white"
                     maxLength={140}
+                    placeholder={copy.questionPlaceholder}
+                    required
                     value={question}
                     onChange={(event) => setQuestion(event.target.value)}
                   />
@@ -140,17 +134,30 @@ export function HomeClient({ initialMode }: HomeClientProps) {
                   <span className="text-sm font-bold text-[#7cf36e]">{copy.choicesLabel}</span>
                   <div className="grid gap-2">
                     {options.map((option, index) => (
-                      <input
-                        className="focus-ring rounded-md border border-white/15 bg-white/8 px-4 py-3 text-white"
-                        key={index}
-                        maxLength={80}
-                        value={option}
-                        onChange={(event) => {
-                          const next = [...options];
-                          next[index] = event.target.value;
-                          setOptions(next);
-                        }}
-                      />
+                      <div className="flex gap-2" key={index}>
+                        <input
+                          className="focus-ring min-w-0 flex-1 rounded-md border border-white/15 bg-white/8 px-4 py-3 text-white"
+                          maxLength={80}
+                          placeholder={copy.choicePlaceholder(index + 1)}
+                          required
+                          value={option}
+                          onChange={(event) => {
+                            const next = [...options];
+                            next[index] = event.target.value;
+                            setOptions(next);
+                          }}
+                        />
+                        {options.length > 2 ? (
+                          <button
+                            aria-label={`${copy.removeChoice} ${index + 1}`}
+                            className="focus-ring grid size-12 shrink-0 place-items-center rounded-md border border-white/15 bg-white/10 text-white transition hover:bg-[#ff4d6d]/35"
+                            type="button"
+                            onClick={() => setOptions(removePollOptionAt(options, index))}
+                          >
+                            <X size={19} />
+                          </button>
+                        ) : null}
+                      </div>
                     ))}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -163,15 +170,6 @@ export function HomeClient({ initialMode }: HomeClientProps) {
                       <Plus size={18} />
                       {copy.addChoice}
                     </button>
-                    {options.length > 2 ? (
-                      <button
-                        className="event-button rounded-md bg-white/12 text-white"
-                        type="button"
-                        onClick={() => setOptions(options.slice(0, -1))}
-                      >
-                        {copy.removeLast}
-                      </button>
-                    ) : null}
                   </div>
                 </div>
 

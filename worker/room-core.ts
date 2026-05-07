@@ -22,7 +22,9 @@ export type HostEvent =
   | { type: "hostConnected" }
   | { type: "hostReconnected" }
   | { type: "hostGraceStarted"; deleteAt: number }
-  | { type: "roomClosed"; reason: "stopped" | "host-timeout" };
+  | { type: "pollStopped" }
+  | { type: "pollStarted" }
+  | { type: "roomClosed"; reason: "host-timeout" };
 
 type CreateRoomInput = {
   poll: PollConfig;
@@ -56,7 +58,7 @@ export class PollRoomCore {
   private readonly hostToken: string;
   private readonly maxVoters: number;
   private readonly now: () => number;
-  private readonly poll: PollConfig;
+  private poll: PollConfig;
   private readonly counts = new Map<string, number>();
   private readonly votes = new Map<string, string | null>();
 
@@ -130,7 +132,6 @@ export class PollRoomCore {
   }
 
   joinHost(hostToken: string): HostEvent {
-    this.assertActive();
     this.assertHost(hostToken);
 
     const wasInGrace = this.hostGraceDeleteAt !== null;
@@ -141,14 +142,13 @@ export class PollRoomCore {
   }
 
   leaveHost(): HostEvent {
-    this.assertActive();
     this.hostConnected = false;
     this.hostGraceDeleteAt = this.now() + 30_000;
     return { type: "hostGraceStarted", deleteAt: this.hostGraceDeleteAt };
   }
 
   expireHostGrace(): HostEvent | null {
-    if (!this.active || this.hostGraceDeleteAt === null) {
+    if (this.hostGraceDeleteAt === null) {
       return null;
     }
 
@@ -162,11 +162,29 @@ export class PollRoomCore {
   stopPoll(hostToken: string): HostEvent {
     this.assertActive();
     this.assertHost(hostToken);
-    return this.close("stopped");
+    this.active = false;
+    this.hostGraceDeleteAt = null;
+    return { type: "pollStopped" };
+  }
+
+  startPoll(hostToken: string, poll: PollConfig): HostEvent {
+    this.assertHost(hostToken);
+    if (this.active) {
+      throw new Error("Poll is active");
+    }
+
+    this.poll = poll;
+    this.active = true;
+    this.hostConnected = true;
+    this.hostGraceDeleteAt = null;
+    for (const sessionId of this.votes.keys()) {
+      this.votes.set(sessionId, null);
+    }
+    this.resetCounts();
+    return { type: "pollStarted" };
   }
 
   joinVoter(sessionId: string): void {
-    this.assertActive();
     if (!this.votes.has(sessionId) && this.votes.size >= this.maxVoters) {
       throw new Error("Room is full");
     }
@@ -182,7 +200,7 @@ export class PollRoomCore {
       return false;
     }
 
-    if (previous) {
+    if (previous && this.active) {
       this.decrement(previous);
     }
     this.votes.delete(sessionId);
@@ -224,7 +242,7 @@ export class PollRoomCore {
     return true;
   }
 
-  private close(reason: "stopped" | "host-timeout"): HostEvent {
+  private close(reason: "host-timeout"): HostEvent {
     this.active = false;
     this.hostConnected = false;
     this.hostGraceDeleteAt = null;

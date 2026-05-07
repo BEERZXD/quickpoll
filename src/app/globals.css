@@ -103,6 +103,12 @@ button {
   transform: scaleY(1.05);
 }
 
+.poll-text-wrap {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 @media (max-width: 720px) {
   .stage-shell {
     padding: 14px;

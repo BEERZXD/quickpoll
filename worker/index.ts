@@ -5,6 +5,7 @@ import {
   type PollRoomCoreState,
   type PollRoomSnapshot,
 } from "./room-core";
+import { formatDefaultPollTitle } from "../src/lib/poll-form";
 import { ResultBroadcastBatcher } from "./result-batcher";
 import { shouldReceiveResultBroadcast } from "./socket-policy";
 import { StorageWriteBatcher } from "./storage-batcher";
@@ -30,7 +31,8 @@ type ClientMessage =
   | { type: "vote"; optionId: string }
   | { type: "clearVote" }
   | { type: "leave" }
-  | { type: "stopPoll" };
+  | { type: "stopPoll" }
+  | { type: "startPoll"; poll?: CreatePollBody };
 
 const ROOM_KEY = "room";
 const RESULTS_FLUSH_MS = 1_000;
@@ -122,7 +124,7 @@ export class PollRoom {
 
     if (request.method === "GET") {
       const core = await this.loadCore();
-      if (!core || !core.snapshot().active) {
+      if (!core) {
         return Response.json({ error: apiCopy.roomClosed }, { status: 404 });
       }
 
@@ -146,7 +148,7 @@ export class PollRoom {
     }
 
     const core = await this.loadCore();
-    if (!core || !core.snapshot().active) {
+    if (!core) {
       send(socket, { type: "roomClosed", reason: "closed" });
       socket.close(1000, apiCopy.roomClosed);
       return;
@@ -212,7 +214,7 @@ export class PollRoom {
     }
 
     const core = await this.loadCore();
-    if (!core || !core.snapshot().active) {
+    if (!core) {
       return Response.json({ error: apiCopy.roomClosed }, { status: 404 });
     }
 
@@ -266,15 +268,32 @@ export class PollRoom {
     socket: WebSocket,
   ): Promise<void> {
     if (attachment.role === "host") {
-      if (message.type !== "stopPoll") {
-        send(socket, { type: "error", message: apiCopy.unsupportedHostMessage });
+      if (message.type === "stopPoll") {
+        const event = core.stopPoll(attachment.hostToken ?? "");
+        if (event.type === "pollStopped") {
+          this.resultBatcher.cancel();
+          await this.saveCoreNow(core);
+          this.broadcast({ type: "state", state: publicState(core.snapshot()) });
+        }
         return;
       }
 
-      const event = core.stopPoll(attachment.hostToken ?? "");
-      if (event.type === "roomClosed") {
-        await this.closeRoom(event.reason);
+      if (message.type === "startPoll") {
+        const validation = validatePoll(message.poll ?? null);
+        if (!validation.ok) {
+          send(socket, { type: "error", message: validation.error });
+          return;
+        }
+
+        const event = core.startPoll(attachment.hostToken ?? "", validation.poll);
+        if (event.type === "pollStarted") {
+          await this.saveCoreNow(core);
+          this.broadcast({ type: "state", state: publicState(core.snapshot()) });
+        }
+        return;
       }
+
+      send(socket, { type: "error", message: apiCopy.unsupportedHostMessage });
       return;
     }
 
@@ -309,14 +328,18 @@ export class PollRoom {
     }
 
     const core = await this.loadCore();
-    if (!core || !core.snapshot().active) {
+    if (!core) {
       return;
     }
 
     if (attachment.role === "voter") {
       if (core.leaveVoter(attachment.sessionId)) {
         this.scheduleCoreSave(core);
-        this.scheduleResultsBroadcast();
+        if (core.snapshot().active) {
+          this.scheduleResultsBroadcast();
+        } else {
+          this.broadcast({ type: "state", state: publicState(core.snapshot()) });
+        }
       }
       return;
     }
@@ -456,23 +479,22 @@ async function createPoll(request: Request, env: Env): Promise<Response> {
   return json(request, env, { error: apiCopy.allocateRoomFailed }, 503);
 }
 
-function validatePoll(body: CreatePollBody | null):
+export function validatePoll(
+  body: CreatePollBody | null,
+  now: () => Date = () => new Date(),
+):
   | { ok: true; poll: PollConfig }
   | { ok: false; error: string } {
   if (!body || typeof body !== "object") {
     return { ok: false, error: apiCopy.invalidPayload };
   }
 
-  const title = cleanText(body.title, 80);
+  const title = cleanText(body.title, 80) ?? formatDefaultPollTitle(now()).slice(0, 80);
   const question = cleanText(body.question, 140);
   const rawOptions = Array.isArray(body.options) ? body.options : [];
   const optionTexts = rawOptions
     .map((option) => cleanText(option, 80))
     .filter((option): option is string => Boolean(option));
-
-  if (!title) {
-    return { ok: false, error: apiCopy.titleRequired };
-  }
 
   if (!question) {
     return { ok: false, error: apiCopy.questionRequired };

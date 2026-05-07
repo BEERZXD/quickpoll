@@ -5,12 +5,14 @@ Quick Poll is a no-login realtime poll maker. The website is designed for Vercel
 ## Fast V1 Rules
 
 - The admin dashboard owns the room lifetime.
-- If the admin clicks **Stop Poll**, the room closes immediately, all voters are kicked, and future joins are rejected.
+- If the admin clicks **Stop Poll**, voting stops immediately, final results are frozen, and the room code stays available for the admin to ask another question.
+- After a stopped poll, the admin dashboard replaces the Stop Poll button with two header actions: go back to the home page or ask a new question in the same room. Frozen choices stay visible, and the winning choice is highlighted.
 - If the admin dashboard disconnects, the room starts a 30 second reconnect grace period.
-- If the same admin reconnects with the host token within 30 seconds, the room continues.
+- If the same admin reconnects with the host token within 30 seconds, the room continues whether it is live or stopped.
 - If the grace period expires, the room closes, all voters are kicked, and future joins are rejected.
 - Voter votes are presence-based: one active browser tab/session has one vote, and leaving removes that vote while the room is active.
-- When a room is closed, voters cannot pick or reset choices anymore.
+- When a poll is stopped, voters cannot pick or reset choices, and they see the final results with winning choices highlighted.
+- When the admin starts another question in the same room, the old poll title is reused, the host enters only a new question and choices, connected voters can vote again, and previous counts reset.
 - Polls are temporary. There is no long-term poll history or 24 hour retention in V1.
 
 ## Architecture
@@ -22,7 +24,10 @@ Quick Poll is a no-login realtime poll maker. The website is designed for Vercel
 - `worker/socket-policy.ts` keeps live result broadcasts host-only.
 - `worker/storage-batcher.ts` coalesces Durable Object storage writes while keeping in-memory room state immediate.
 - `tests/room-core.test.ts` covers room lifecycle and vote behavior.
-- `src/lib/vote-ui.ts` contains voter interaction rules, including the closed-poll lockout.
+- `src/lib/host-stop-ui.ts` contains host stopped-view display rules.
+- `src/lib/vote-ui.ts` contains voter interaction and stopped-result display rules, including the closed-poll lockout.
+- `src/lib/result-ui.ts` contains shared result display helpers such as winner detection.
+- `src/lib/poll-form.ts` contains shared form validation and the fallback `Poll DD/MM/YYYY : HH:mm` title formatter.
 
 ## Language And Fonts
 
@@ -31,6 +36,7 @@ Quick Poll is a no-login realtime poll maker. The website is designed for Vercel
 - `Geist Mono` is used only for room codes, numbers, and technical text.
 - Main UI copy lives in `src/lib/copy.ts`.
 - Worker error messages that users can see are translated to Thai.
+- Poll titles, questions, and choices use a shared wrapping style so long text stays inside the screen and its panel.
 
 ## Environment
 
@@ -67,11 +73,12 @@ npx.cmd agent-browser snapshot -i
 - Each room maps to one Durable Object, so different room codes scale horizontally across different objects. One very large room is still coordinated by one single-threaded Durable Object.
 - Result broadcasts are dirty-batched to once per second. Votes, clears, joins, and leaves update room state immediately, but admin dashboards receive coalesced `results` messages instead of one broadcast per vote.
 - Voter sockets do not receive live `results` broadcasts after joining. They keep local choice state and still receive `state`, `roomClosed`, and `error` messages.
+- Stop Poll broadcasts a final `state` message to all sockets so voters can see frozen results.
 - Duplicate voter actions are no-ops: choosing the already selected option or clearing an already empty vote skips storage writes and skips result batching.
 - Room results use incremental aggregate counts instead of recounting all voter sessions for every snapshot.
 - Durable Object storage writes for vote, clear, join, and leave changes are batched for 500 ms. The Durable Object keeps the latest room state in memory immediately, then persists only the latest pending state.
-- Critical room lifecycle writes are still immediate: room creation, host connect/reconnect, host disconnect grace timer, and room deletion.
-- Stop Poll and room deletion stay immediate. Pending result batches are cancelled when the room closes.
+- Critical room lifecycle writes are still immediate: room creation, Stop Poll, starting the next question, host connect/reconnect, host disconnect grace timer, and room deletion.
+- Stop Poll cancels pending result batches and persists the frozen final state immediately. Room deletion stays immediate when the host grace timer expires.
 - For Fast V1, keep 1000 voters per room until a deployed Cloudflare load test confirms a higher cap. Raising the cap again should come with a remote production load test and anti-spam rate limits.
 
 Local performance before result batching was checked on May 7, 2026 with Wrangler dev at `http://127.0.0.1:8787`:
@@ -140,19 +147,20 @@ All production load-test rooms reached the expected final voter count and were s
 
 - `/` starts with only two choices: create a poll or join by 6 digit room code.
 - `/create` opens the poll creation form.
+- The create form does not require `ชื่อโพล`; a blank title becomes `Poll DD/MM/YYYY : HH:mm`. `คำถาม` is required, and visible `ตัวเลือก` fields are required with a 2 to 8 option limit. Once more than two choices exist, each choice field has its own delete button, while at least two fields always remain.
 - `/join` opens the room-code join form.
 - The first two choices are real route-backed links so they still navigate if client hydration is delayed, then enhance into instant in-page transitions after React loads.
-- `/host/[roomCode]?token=...` is the private admin dashboard.
-- `/poll/[roomCode]` is the voter page used by QR codes and room entry.
+- `/host/[roomCode]?token=...` is the private admin dashboard. After Stop Poll, it shows action buttons in the header where Stop Poll was, keeps frozen choices visible, and highlights the winning choice. On mobile, stopped-state header actions stack below the title so default poll titles do not collapse into one-character columns. New question opens a question-and-choice-only form in the main panel and reuses the old title. The QR side panel also has a copy-link button for the voter join URL.
+- `/poll/[roomCode]` is the voter page used by QR codes and room entry. After Stop Poll, it shows final results, highlights winning choices, and disables voting until the admin starts another question.
 
 ## Realtime Protocol
 
 - `POST /polls` creates a room.
-- `GET /polls/:roomCode` returns public poll state while the room is active.
+- `GET /polls/:roomCode` returns public poll state while the room exists, including stopped polls with frozen final results.
 - `GET /polls/:roomCode/socket` upgrades to a WebSocket.
-- Host sockets send `stopPoll`.
+- Host sockets send `stopPoll` and `startPoll`.
 - Voter sockets send `vote`, `clearVote`, and `leave`.
-- Server messages are `state`, `results`, `roomClosed`, and `error`.
+- Server messages are `state`, `results`, `roomClosed`, and `error`. Stop Poll now uses a `state` message with `active: false`; `roomClosed` is reserved for deleted or unavailable rooms.
 
 ## Verification
 
@@ -171,12 +179,22 @@ npm.cmd run perf:local -- --voters 500 --batch 50
 npm.cmd run perf:local -- --voters 1000 --batch 100
 ```
 
-Local smoke coverage also created a room through the Worker, connected one host and two voters over WebSocket, counted votes live, removed a vote when a voter socket closed, stopped the poll from the host socket, kicked the remaining voter, and confirmed the deleted room returned 404.
+Local smoke coverage also creates a room through the Worker, connects one host and voters over WebSocket, counts votes live, stops the poll from the host socket, confirms final results stay visible to host and voter sockets, starts another question in the same room, and verifies voting works again without a new room code.
 
 `agent-browser` is installed as a dev dependency for visual checks of the local Next.js app. It has verified that the home page renders interactive create/join controls, has no framework error overlay, uses `Noto Sans Thai`, and can submit the create form into the admin dashboard.
 
 On May 7, 2026, the local browser flow was rechecked on both `http://localhost:3001` and `http://127.0.0.1:3001`: create and join links opened their real routes, `127.0.0.1` poll creation posted to the local Worker successfully, and the host WebSocket connected.
 
-Closed-poll voter UI has been verified with `agent-browser`: after the host clicks Stop Poll, the voter choice buttons and reset/clear button are disabled.
+Closed-poll voter UI has been verified with `agent-browser`: after the host clicks Stop Poll, the voter choice buttons and reset/clear button are replaced by final result bars and a home link.
+
+On May 7, 2026, stopped-poll voter winner highlighting was checked locally on room `686745`: after two votes for `Beta` and Stop Poll, `agent-browser` saw the voter page render `Alpha`, `Beta`, and `Gamma` final result rows with only `Beta` marked `ชนะ` and the winner highlight class.
+
+On May 7, 2026, this same-room restart change was checked locally with `npm.cmd test`, `npm.cmd run lint`, `npx.cmd tsc --noEmit`, `npm.cmd run build`, and `npx.cmd wrangler deploy --dry-run`. A WebSocket smoke test created room `108355`, stopped it with final results preserved, started a follow-up question in the same room, and accepted another vote. `agent-browser` also verified `http://localhost:3001/create` shows `โหวตสดทันที`, optional `ชื่อโพล`, required `คำถาม`, required option fields, stopped-host controls for home/new question, and voter final results after Stop Poll.
+
+On May 7, 2026, the host stopped-state removal of `ดูผลโหวต` was rechecked locally with `agent-browser` on room `627915`: after Stop Poll, the header showed only `กลับหน้าแรก` and `ถามคำถามใหม่`, the QR/voter side column remained, and the new-question form opened in the main panel. The stopped-choice winner highlight was then rechecked locally on room `822823`: after Stop Poll, `Alpha`, `Beta`, and `Gamma` all stayed visible, and `Beta` was marked `ชนะ` with 100%.
+
+On May 7, 2026, the follow-up and choice-editor UI were rechecked locally with `agent-browser`: the stopped-host new-question form showed only question and choice fields, starting it kept `Original Title`, the create form exposed per-choice delete buttons after adding a third option, deleting a middle option kept two choices, and long unbroken title/question/choice text produced no horizontal page overflow on host or voter pages.
 
 On May 7, 2026, Vercel production deploy `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT` was inspected as `Ready`, and `agent-browser` verified the full production flow on `https://beerquickpoll.vercel.app`: create a poll, join as a voter, cast a vote, see live host results update, stop the poll, and see voter choices disabled after closure.
+
+On May 7, 2026, the host mobile stopped-header layout and QR share-link copy text were covered with `npm.cmd test -- tests/host-stop-ui.test.ts`, `npm.cmd test -- tests/copy.test.ts`, the full `npm.cmd test` suite, `npm.cmd run lint`, `npx.cmd tsc --noEmit`, and `npm.cmd run build`. A local mobile `agent-browser` check on room `169067` verified that after Stop Poll the host header uses a column layout with a 305 px title width, shows only `กลับหน้าแรก` and `ถามคำถามใหม่` in the stopped header, renders the QR copy-link button, and copies `http://127.0.0.1:3001/poll/169067` with the `คัดลอกลิงก์แล้ว` button state.
