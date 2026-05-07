@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img">
+  <title>Quick Poll</title>
+  <rect width="64" height="64" rx="14" fill="#101114" />
+  <circle cx="47" cy="17" r="6" fill="#ffcc30" />
+  <rect x="15" y="18" width="26" height="8" rx="4" fill="#22d3ee" />
+  <rect x="15" y="32" width="34" height="8" rx="4" fill="#ffcc30" />
+  <rect x="15" y="46" width="20" height="8" rx="4" fill="#22d3ee" />
+  <circle cx="12" cy="22" r="3" fill="#fff8e8" />
+  <circle cx="12" cy="36" r="3" fill="#fff8e8" />
+  <circle cx="12" cy="50" r="3" fill="#fff8e8" />
+</svg>

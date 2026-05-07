@@ -35,6 +35,7 @@ Quick Poll is a no-login realtime poll maker. The website is designed for Vercel
 - The modern Thai UI font is `Noto Sans Thai` via `next/font/google`.
 - `Geist Mono` is used only for room codes, numbers, and technical text.
 - Main UI copy lives in `src/lib/copy.ts`.
+- The browser tab favicon is `src/app/icon.svg`, using the Quick Poll dark, cyan, and yellow palette.
 - Worker error messages that users can see are translated to Thai.
 - Poll titles, questions, and choices use a shared wrapping style so long text stays inside the screen and its panel.
 
@@ -198,3 +199,5 @@ On May 7, 2026, the follow-up and choice-editor UI were rechecked locally with `
 On May 7, 2026, Vercel production deploy `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT` was inspected as `Ready`, and `agent-browser` verified the full production flow on `https://beerquickpoll.vercel.app`: create a poll, join as a voter, cast a vote, see live host results update, stop the poll, and see voter choices disabled after closure.
 
 On May 7, 2026, the host mobile stopped-header layout and QR share-link copy text were covered with `npm.cmd test -- tests/host-stop-ui.test.ts`, `npm.cmd test -- tests/copy.test.ts`, the full `npm.cmd test` suite, `npm.cmd run lint`, `npx.cmd tsc --noEmit`, and `npm.cmd run build`. A local mobile `agent-browser` check on room `169067` verified that after Stop Poll the host header uses a column layout with a 305 px title width, shows only `กลับหน้าแรก` and `ถามคำถามใหม่` in the stopped header, renders the QR copy-link button, and copies `http://127.0.0.1:3001/poll/169067` with the `คัดลอกลิงก์แล้ว` button state.
+
+On May 7, 2026, the tab favicon was added as `src/app/icon.svg` and covered with `npm.cmd test -- tests/app-icon.test.ts`.
