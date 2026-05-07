@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "quickpoll-realtime",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-12-01",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "POLL_ROOMS",
+        "class_name": "PollRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["PollRoom"]
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001"
+  }
+}
