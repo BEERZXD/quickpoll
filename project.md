@@ -109,6 +109,17 @@ Local performance after incremental counts and 500 ms storage write batching was
 
 These are local development numbers, not production Cloudflare guarantees. They are still useful as regression checks for the current implementation.
 
+Production performance was checked on May 7, 2026 from this development machine against `https://quickpoll-realtime.beerza4192.workers.dev` with origin `https://beerquickpoll.vercel.app`:
+
+| Voters | Batch | Create time | Connect time | Vote to final host result |
+| --- | ---: | ---: | ---: | ---: |
+| 100 | 50 | 2644.2 ms | 701.9 ms | 269.9 ms |
+| 250 | 50 | 1019.7 ms | 1234.5 ms | 887.8 ms |
+| 500 | 50 | 982.4 ms | 2330.2 ms | 772.7 ms |
+| 1000 | 100 | 3106.3 ms | 3948.7 ms | 487.3 ms |
+
+All production load-test rooms reached the expected final voter count and were stopped by the host socket at the end of the test.
+
 ## Deployment
 
 - GitHub repository: `https://github.com/BEERZXD/quickpoll`
