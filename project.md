@@ -36,7 +36,7 @@ Quick Poll is a no-login realtime poll maker. The website is designed for Vercel
 - `Geist Mono` is used only for room codes, numbers, and technical text.
 - Main UI copy lives in `src/lib/copy.ts`.
 - The browser tab favicon is `src/app/icon.svg`, using the Quick Poll dark, cyan, and yellow palette.
-- Browser tab titles are route-specific: the create page does not reuse the generic home title, and creator/voter room pages share the `Room | <room code>` title.
+- Browser tab titles are route-specific: the create page does not reuse the generic home title, creator room pages use `Room | <room code>`, and voter room pages use `Quick Poll | <room code>`.
 - Every page uses a fixed bottom credit pill from `src/app/SiteFooter.tsx` with `Made with ❤️ by _bxxr.t`; the handle links to Instagram. Long pages use normal document-level vertical scrolling instead of nested panel scrollbars.
 - Host and voter poll headers keep action/status controls in their own row above long poll text, so titles and questions wrap across the real panel width. The closed status label stays on one line, and result rows keep vote counts inside the panel beside long labels.
 - Worker error messages that users can see are translated to Thai.
@@ -155,7 +155,7 @@ All production load-test rooms reached the expected final voter count and were s
 - `/join` opens the room-code join form.
 - The first two choices are real route-backed links so they still navigate if client hydration is delayed, then enhance into instant in-page transitions after React loads.
 - `/host/[roomCode]?token=...` is the private admin dashboard. Its browser tab title is `Room | <room code>`. After Stop Poll, it shows action buttons in a full-width header row above the title, keeps frozen choices visible, and highlights the winning choice. New question opens a question-and-choice-only form in the main panel and reuses the old title. The QR side panel content sizes to its QR/link controls and also has a copy-link button for the voter join URL.
-- `/poll/[roomCode]` is the voter page used by QR codes and room entry. Its browser tab title is `Room | <room code>`. After Stop Poll, it shows final results, highlights winning choices, and disables voting until the admin starts another question.
+- `/poll/[roomCode]` is the voter page used by QR codes and room entry. Its browser tab title and share preview title are `Quick Poll | <room code>`, and its share preview description uses the poll title fetched from public room state. After Stop Poll, it shows final results, highlights winning choices, and disables voting until the admin starts another question.
 
 ## Realtime Protocol
 
@@ -212,3 +212,5 @@ On May 8, 2026, long-text host and voter overflow was rechecked with `npm.cmd te
 On May 8, 2026, route-specific browser tab titles were covered with `npm.cmd test -- tests/page-metadata.test.ts`. `agent-browser` verified `http://127.0.0.1:3001/create` uses `สร้างโพล | Quick Poll`, and room pages now use the shared `Room | <room code>` title for both creator and voter tabs.
 
 On May 8, 2026, the shared room tab title format was updated and rechecked. `agent-browser` verified local room `652273` shows `Room | 652273` on both the creator dashboard and voter page.
+
+On May 8, 2026, voter-link share metadata was updated and rechecked. Local room `814278` with poll title `Lunch Vote` rendered browser title, `og:title`, and `twitter:title` as `Quick Poll | 814278`, and rendered description, `og:description`, and `twitter:description` as `Lunch Vote`.

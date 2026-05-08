@@ -10,7 +10,8 @@ export const appCopy = {
     title: "Quick Poll | สร้างโพลสดทันที",
     createTitle: "สร้างโพล | Quick Poll",
     hostTitle: (roomCode: string) => `Room | ${roomCode}`,
-    voterTitle: (roomCode: string) => `Room | ${roomCode}`,
+    voterTitle: (roomCode: string) => `Quick Poll | ${roomCode}`,
+    voterFallbackDescription: (roomCode: string) => `Join room ${roomCode} and vote in Quick Poll.`,
     description: "สร้างโพลสดและให้โหวตแบบเรียลไทม์โดยไม่ต้องล็อกอิน",
   },
   home: {

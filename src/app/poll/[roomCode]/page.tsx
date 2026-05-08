@@ -1,5 +1,5 @@
 import { VoteClient } from "./VoteClient";
-import { voterPageMetadata } from "@/lib/page-metadata";
+import { fetchVoterPageMetadata } from "@/lib/page-metadata";
 
 type PollPageProps = {
   params: Promise<{ roomCode: string }>;
@@ -7,7 +7,7 @@ type PollPageProps = {
 
 export async function generateMetadata({ params }: PollPageProps) {
   const { roomCode } = await params;
-  return voterPageMetadata(roomCode);
+  return fetchVoterPageMetadata(roomCode);
 }
 
 export default async function PollPage({ params }: PollPageProps) {
