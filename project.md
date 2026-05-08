@@ -137,7 +137,7 @@ All production load-test rooms reached the expected final voter count and were s
 - Vercel production URL: `https://bquickpoll.vercel.app`
 - Vercel deployment ID: `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT`
 - Cloudflare Worker URL: `https://quickpoll-realtime.beerza4192.workers.dev`
-- Cloudflare Worker version ID: `d5812beb-03a1-4e31-afd6-dc4cf376a5f7`
+- Cloudflare Worker version ID: `8fd02360-8cfa-4a2a-a1ef-86667fbfde5f`
 - Vercel deploys the Next.js app from GitHub.
 - GitHub Actions can deploy the Cloudflare Worker when these secrets are configured:
   - `CLOUDFLARE_API_TOKEN`
@@ -225,3 +225,5 @@ On May 8, 2026, the stopped-result PNG header was updated to include the bquickp
 On May 8, 2026, product-facing branding was renamed from Quick Poll to `bquickpoll` to match the production domain `https://bquickpoll.vercel.app`. This updates app copy, metadata titles, favicon title, browser session key, package name, stopped-result PNG header text, and stopped-result PNG filename prefix. Existing infrastructure identifiers such as the GitHub repository and Cloudflare Worker URL still use their configured `quickpoll` names.
 
 On May 8, 2026, the stopped-result PNG header spacing was increased so long poll titles do not crowd the room code timestamp. The host dashboard action row was also adjusted so the `สด` / `ปิดแล้ว` status pill sits at the far left, while home, download, stop, and new-question controls stay grouped on the right. This was covered with `npm.cmd test -- tests/host-stop-ui.test.ts tests/page-layout.test.ts tests/result-image.test.ts`; `agent-browser` verified room `276828` with status at left and controls at right, and exported `bquickpoll-276828-2026-05-08-2354.png` with a clear timestamp/title gap.
+
+On May 9, 2026, production poll creation was failing with "Failed to fetch" because `https://bquickpoll.vercel.app` was missing from the Cloudflare Worker `ALLOWED_ORIGINS` in `wrangler.jsonc`. The origin list included older Vercel preview URLs but not the current production domain. Added `https://bquickpoll.vercel.app` to `ALLOWED_ORIGINS` and deployed Worker version `8fd02360-8cfa-4a2a-a1ef-86667fbfde5f`. Production poll creation was verified working on `https://bquickpoll.vercel.app/create`.
