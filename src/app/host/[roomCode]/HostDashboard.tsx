@@ -3,7 +3,7 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import QRCode from "qrcode";
-import { Copy, Home, OctagonX, Plus, QrCode, Radio, Send, Square, Users, X } from "lucide-react";
+import { Copy, Download, Home, OctagonX, Plus, QrCode, Radio, Send, Square, Users, X } from "lucide-react";
 import { realtimeSocketUrl } from "@/lib/poll-api";
 import { appCopy } from "@/lib/copy";
 import {
@@ -14,6 +14,7 @@ import {
   type HostStoppedView,
 } from "@/lib/host-stop-ui";
 import { buildFollowUpPollPayload, canSubmitPollForm, removePollOptionAt } from "@/lib/poll-form";
+import { renderResultImageBlob, resultImageFilename } from "@/lib/result-image";
 import type { PollState, ServerMessage } from "@/lib/types";
 
 type HostDashboardProps = {
@@ -160,6 +161,12 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
     question: nextQuestion,
     options: nextOptions,
   });
+  const statusPill = (
+    <div className="status-pill inline-flex whitespace-nowrap items-center gap-2 rounded-md bg-[#22d3ee]/15 px-3 py-2 text-sm font-black text-[#b7f7ff]">
+      <Radio size={18} />
+      {statusLabel(status)}
+    </div>
+  );
 
   function stopPoll() {
     if (!state?.active) {
@@ -180,6 +187,24 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
       copyResetTimerRef.current = window.setTimeout(() => setJoinLinkCopyStatus("idle"), 1800);
     } catch {
       setJoinLinkCopyStatus("failed");
+    }
+  }
+
+  async function downloadResultImage() {
+    if (!state || state.active) {
+      return;
+    }
+
+    try {
+      const blob = await renderResultImageBlob({ roomCode, state });
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = resultImageFilename(roomCode);
+      link.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      setError(copy.downloadResultImageFailed);
     }
   }
 
@@ -215,10 +240,6 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
         <section className="glass-panel flex min-h-[560px] flex-col rounded-lg p-5 sm:p-8">
           <header className={headerLayout.header}>
             <div className={headerLayout.titleArea}>
-              <div className="mb-3 inline-flex whitespace-nowrap items-center gap-2 rounded-md bg-[#22d3ee]/15 px-3 py-2 text-sm font-black text-[#b7f7ff]">
-                <Radio size={18} />
-                {statusLabel(status)}
-              </div>
               <h1 className="poll-text-wrap w-full text-3xl font-black tracking-normal sm:text-6xl">
                 {state?.poll.title ?? copy.connectingTitle}
               </h1>
@@ -228,25 +249,40 @@ export function HostDashboard({ roomCode, hostToken }: HostDashboardProps) {
             </div>
             {state?.active ? (
               <div className={headerLayout.actions}>
-                <button className="event-button rounded-md bg-[#ff4d6d] text-white" type="button" onClick={stopPoll}>
-                  <OctagonX size={22} />
-                  {copy.stopPoll}
-                </button>
+                {statusPill}
+                <div className="host-action-controls flex flex-wrap justify-end gap-2">
+                  <button className="event-button rounded-md bg-[#ff4d6d] text-white" type="button" onClick={stopPoll}>
+                    <OctagonX size={22} />
+                    {copy.stopPoll}
+                  </button>
+                </div>
               </div>
             ) : state ? (
               <div className={headerLayout.actions}>
-                <Link className="event-button rounded-md bg-white/12 text-white no-underline" href="/">
-                  <Home size={18} />
-                  {copy.backHome}
-                </Link>
-                <button
-                  className="event-button rounded-md bg-[#22d3ee] text-[#071013]"
-                  type="button"
-                  onClick={() => setStoppedView("newQuestion")}
-                >
-                  <Plus size={18} />
-                  {copy.askAgain}
-                </button>
+                {statusPill}
+                <div className="host-action-controls flex flex-wrap justify-end gap-2">
+                  <Link className="event-button rounded-md bg-white/12 text-white no-underline" href="/">
+                    <Home size={18} />
+                    {copy.backHome}
+                  </Link>
+                  <button
+                    aria-label={copy.downloadResultImage}
+                    className="event-button icon-button rounded-md bg-white/12 text-white"
+                    title={copy.downloadResultImage}
+                    type="button"
+                    onClick={downloadResultImage}
+                  >
+                    <Download size={19} />
+                  </button>
+                  <button
+                    className="event-button rounded-md bg-[#22d3ee] text-[#071013]"
+                    type="button"
+                    onClick={() => setStoppedView("newQuestion")}
+                  >
+                    <Plus size={18} />
+                    {copy.askAgain}
+                  </button>
+                </div>
               </div>
             ) : null}
           </header>

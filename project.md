@@ -1,6 +1,6 @@
-# Quick Poll
+# bquickpoll
 
-Quick Poll is a no-login realtime poll maker. The website is designed for Vercel, while realtime room state lives in a Cloudflare Durable Object because Vercel Functions do not run a WebSocket server.
+bquickpoll is a no-login realtime poll maker. The website is designed for Vercel, while realtime room state lives in a Cloudflare Durable Object because Vercel Functions do not run a WebSocket server.
 
 ## Fast V1 Rules
 
@@ -35,8 +35,8 @@ Quick Poll is a no-login realtime poll maker. The website is designed for Vercel
 - The modern Thai UI font is `Noto Sans Thai` via `next/font/google`.
 - `Geist Mono` is used only for room codes, numbers, and technical text.
 - Main UI copy lives in `src/lib/copy.ts`.
-- The browser tab favicon is `src/app/icon.svg`, using the Quick Poll dark, cyan, and yellow palette.
-- Browser tab titles are route-specific: the create page does not reuse the generic home title, creator room pages use `Room | <room code>`, and voter room pages use `Quick Poll | <room code>`.
+- The browser tab favicon is `src/app/icon.svg`, using the bquickpoll dark, cyan, and yellow palette.
+- Browser tab titles are route-specific: the create page does not reuse the generic home title, creator room pages use `Room | <room code>`, and voter room pages use `bquickpoll | <room code>`.
 - Every page uses a fixed bottom credit pill from `src/app/SiteFooter.tsx` with `Made with ❤️ by _bxxr.t`; the handle links to Instagram. Long pages use normal document-level vertical scrolling instead of nested panel scrollbars.
 - Host and voter poll headers keep action/status controls in their own row above long poll text, so titles and questions wrap across the real panel width. The closed status label stays on one line, and result rows keep vote counts inside the panel beside long labels.
 - Worker error messages that users can see are translated to Thai.
@@ -120,7 +120,7 @@ Local performance after incremental counts and 500 ms storage write batching was
 
 These are local development numbers, not production Cloudflare guarantees. They are still useful as regression checks for the current implementation.
 
-Production performance was checked on May 7, 2026 from this development machine against `https://quickpoll-realtime.beerza4192.workers.dev` with origin `https://beerquickpoll.vercel.app`:
+Production performance was checked on May 7, 2026 from this development machine against `https://quickpoll-realtime.beerza4192.workers.dev` with origin `https://bquickpoll.vercel.app`:
 
 | Voters | Batch | Create time | Connect time | Vote to final host result |
 | --- | ---: | ---: | ---: | ---: |
@@ -134,7 +134,7 @@ All production load-test rooms reached the expected final voter count and were s
 ## Deployment
 
 - GitHub repository: `https://github.com/BEERZXD/quickpoll`
-- Vercel production URL: `https://beerquickpoll.vercel.app`
+- Vercel production URL: `https://bquickpoll.vercel.app`
 - Vercel deployment ID: `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT`
 - Cloudflare Worker URL: `https://quickpoll-realtime.beerza4192.workers.dev`
 - Cloudflare Worker version ID: `d5812beb-03a1-4e31-afd6-dc4cf376a5f7`
@@ -155,7 +155,8 @@ All production load-test rooms reached the expected final voter count and were s
 - `/join` opens the room-code join form.
 - The first two choices are real route-backed links so they still navigate if client hydration is delayed, then enhance into instant in-page transitions after React loads.
 - `/host/[roomCode]?token=...` is the private admin dashboard. Its browser tab title is `Room | <room code>`. After Stop Poll, it shows action buttons in a full-width header row above the title, keeps frozen choices visible, and highlights the winning choice. New question opens a question-and-choice-only form in the main panel and reuses the old title. The QR side panel content sizes to its QR/link controls and also has a copy-link button for the voter join URL.
-- `/poll/[roomCode]` is the voter page used by QR codes and room entry. Its browser tab title and share preview title are `Quick Poll | <room code>`, and its share preview description uses the poll title fetched from public room state. After Stop Poll, it shows final results, highlights winning choices, and disables voting until the admin starts another question.
+- Stopped host rooms include an icon-only download action that saves a branded PNG result card. The image is generated in the browser from frozen poll state and includes the favicon, export date/time, poll title, question, room code, choices, counts, percentages, total voters, and winner labels. Filenames use `bquickpoll-<roomCode>-<YYYY-MM-DD-HHmm>.png`.
+- `/poll/[roomCode]` is the voter page used by QR codes and room entry. Its browser tab title and share preview title are `bquickpoll | <room code>`, and its share preview description uses the poll title fetched from public room state. After Stop Poll, it shows final results, highlights winning choices, and disables voting until the admin starts another question.
 
 ## Realtime Protocol
 
@@ -199,7 +200,7 @@ On May 7, 2026, the host stopped-state removal of `ดูผลโหวต` was
 
 On May 7, 2026, the follow-up and choice-editor UI were rechecked locally with `agent-browser`: the stopped-host new-question form showed only question and choice fields, starting it kept `Original Title`, the create form exposed per-choice delete buttons after adding a third option, deleting a middle option kept two choices, and long unbroken title/question/choice text produced no horizontal page overflow on host or voter pages.
 
-On May 7, 2026, Vercel production deploy `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT` was inspected as `Ready`, and `agent-browser` verified the full production flow on `https://beerquickpoll.vercel.app`: create a poll, join as a voter, cast a vote, see live host results update, stop the poll, and see voter choices disabled after closure.
+On May 7, 2026, Vercel production deploy `dpl_3oWNeTpH4rzsiyD8MviNhpcAEGJT` was inspected as `Ready`, and `agent-browser` verified the full production flow on `https://bquickpoll.vercel.app`: create a poll, join as a voter, cast a vote, see live host results update, stop the poll, and see voter choices disabled after closure.
 
 On May 8, 2026, Cloudflare Worker version `d5812beb-03a1-4e31-afd6-dc4cf376a5f7` was deployed after production was found to be using the old Stop Poll behavior that deleted the room. `agent-browser` verified production room `862320`: after Stop Poll, the host header replaced `หยุดโพล` with `กลับหน้าแรก` and `ถามคำถามใหม่`, and `GET /polls/862320` returned a stopped room state with `active: false` instead of a closed-room error.
 
@@ -209,8 +210,18 @@ On May 7, 2026, the tab favicon was added as `src/app/icon.svg` and covered with
 
 On May 8, 2026, long-text host and voter overflow was rechecked with `npm.cmd test`, `npm.cmd run lint`, `npx.cmd tsc --noEmit`, and `npm.cmd run build`. `agent-browser` verified local room `589572` at 320 px wide with zero horizontal overflow on both stopped host and voter pages; the stopped action/status row stayed above the title, `ปิดแล้ว` stayed on one line, result counts stayed inside their panels, and the 1440 px host sidebar cards measured to their own QR/voter content heights instead of filling the whole right column.
 
-On May 8, 2026, route-specific browser tab titles were covered with `npm.cmd test -- tests/page-metadata.test.ts`. `agent-browser` verified `http://127.0.0.1:3001/create` uses `สร้างโพล | Quick Poll`, and room pages now use the shared `Room | <room code>` title for both creator and voter tabs.
+On May 8, 2026, route-specific browser tab titles were covered with `npm.cmd test -- tests/page-metadata.test.ts`. `agent-browser` verified `http://127.0.0.1:3001/create` uses `สร้างโพล | bquickpoll`, and room pages now use the shared `Room | <room code>` title for both creator and voter tabs.
 
 On May 8, 2026, the shared room tab title format was updated and rechecked. `agent-browser` verified local room `652273` shows `Room | 652273` on both the creator dashboard and voter page.
 
-On May 8, 2026, voter-link share metadata was updated and rechecked. Local room `814278` with poll title `Lunch Vote` rendered browser title, `og:title`, and `twitter:title` as `Quick Poll | 814278`, and rendered description, `og:description`, and `twitter:description` as `Lunch Vote`.
+On May 8, 2026, voter-link share metadata was updated and rechecked. Local room `814278` with poll title `Lunch Vote` rendered browser title, `og:title`, and `twitter:title` as `bquickpoll | 814278`, and rendered description, `og:description`, and `twitter:description` as `Lunch Vote`.
+
+On May 8, 2026, host-only stopped-result PNG export was added on branch `feature/host-result-image-export`, with rollback checkpoint branch `backup/before-result-image-export-2026-05-08` pointing at `6face15 Add voter share metadata`. It was checked with `npm.cmd test`, `npm.cmd run lint`, `npx.cmd tsc --noEmit`, and `npm.cmd run build`. A local `agent-browser` smoke test created room `724088`, voted for `Beta`, stopped the poll, clicked the icon-only download action, and captured a generated `image/png` blob of 66,676 bytes with filename `bquickpoll-724088-2026-05-08-2317.png`.
+
+On May 8, 2026, the stopped-result PNG row layout was fixed so winning labels are reserved above result bars instead of being overlapped by them in short-choice exports. The regression was covered with `npm.cmd test -- tests/result-image.test.ts`, and a local `agent-browser` export for room `366671` generated `bquickpoll-366671-2026-05-08-2331.png` with the `ชนะ` label visibly separated from the 100% bar.
+
+On May 8, 2026, the stopped-result PNG header was updated to include the bquickpoll favicon plus a visible local export timestamp. This was covered with `npm.cmd test -- tests/result-image.test.ts`, and a local `agent-browser` export for room `114420` generated `bquickpoll-114420-2026-05-08-2338.png` showing the favicon at top-left and `2026-05-08 23:38` under the room code.
+
+On May 8, 2026, product-facing branding was renamed from Quick Poll to `bquickpoll` to match the production domain `https://bquickpoll.vercel.app`. This updates app copy, metadata titles, favicon title, browser session key, package name, stopped-result PNG header text, and stopped-result PNG filename prefix. Existing infrastructure identifiers such as the GitHub repository and Cloudflare Worker URL still use their configured `quickpoll` names.
+
+On May 8, 2026, the stopped-result PNG header spacing was increased so long poll titles do not crowd the room code timestamp. The host dashboard action row was also adjusted so the `สด` / `ปิดแล้ว` status pill sits at the far left, while home, download, stop, and new-question controls stay grouped on the right. This was covered with `npm.cmd test -- tests/host-stop-ui.test.ts tests/page-layout.test.ts tests/result-image.test.ts`; `agent-browser` verified room `276828` with status at left and controls at right, and exported `bquickpoll-276828-2026-05-08-2354.png` with a clear timestamp/title gap.

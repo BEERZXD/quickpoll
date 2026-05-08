@@ -26,7 +26,7 @@ export function VoteClient({ roomCode }: VoteClientProps) {
       return "";
     }
 
-    const key = `quickpoll:${roomCode}:session`;
+    const key = `bquickpoll:${roomCode}:session`;
     const existing = window.sessionStorage.getItem(key);
     if (existing) {
       return existing;

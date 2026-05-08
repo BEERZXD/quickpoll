@@ -4,12 +4,16 @@ import { appCopy, fontConfig } from "../src/lib/copy";
 describe("Thai app copy", () => {
   it("uses Thai as the primary UI language", () => {
     expect(appCopy.language).toBe("th");
+    expect(appCopy.productName).toBe("bquickpoll");
+    expect(appCopy.metadata.createTitle).toBe("สร้างโพล | bquickpoll");
     expect(appCopy.home.subtitle).toBe("โหวตสดทันที");
     expect(appCopy.home.createButton).toBe("สร้างโพล");
     expect(appCopy.home.joinTitle).toBe("เข้าร่วมโพล");
     expect(appCopy.host.stopPoll).toBe("หยุดโพล");
     expect(appCopy.host.copyJoinLink).toBe("คัดลอกลิงก์เข้าร่วม");
     expect(appCopy.host.linkCopied).toBe("คัดลอกลิงก์แล้ว");
+    expect(appCopy.host.downloadResultImage).toBe("ดาวน์โหลดผลเป็นรูป");
+    expect(appCopy.host.downloadResultImageFailed).toBe("ดาวน์โหลดรูปผลโหวตไม่สำเร็จ");
     expect(appCopy.voter.clearVote).toBe("ล้างคำตอบ");
     expect((appCopy.voter as typeof appCopy.voter & { winnerLabel?: string }).winnerLabel).toBe(appCopy.host.winnerLabel);
   });

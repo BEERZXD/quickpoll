@@ -26,7 +26,7 @@ describe("page metadata", () => {
     const voterMetadata = voterPageMetadata({ roomCode: "440340", pollTitle: "Lunch Vote" });
 
     expect(hostMetadata.title).toBe("Room | 440340");
-    expect(voterMetadata.title).toBe("Quick Poll | 440340");
+    expect(voterMetadata.title).toBe("bquickpoll | 440340");
     expect(hostMetadata.title).not.toBe(voterMetadata.title);
     expect(hostMetadata.title).not.toBe(appCopy.metadata.title);
     expect(voterMetadata.title).not.toBe(appCopy.metadata.title);
@@ -37,12 +37,12 @@ describe("page metadata", () => {
 
     expect(metadata.description).toBe("Lunch Vote");
     expect(metadata.openGraph).toMatchObject({
-      title: "Quick Poll | 440340",
+      title: "bquickpoll | 440340",
       description: "Lunch Vote",
     });
     expect(metadata.twitter).toMatchObject({
       card: "summary",
-      title: "Quick Poll | 440340",
+      title: "bquickpoll | 440340",
       description: "Lunch Vote",
     });
   });
@@ -50,10 +50,10 @@ describe("page metadata", () => {
   it("falls back to an invite description when the voter poll title is unavailable", () => {
     const metadata = voterPageMetadata({ roomCode: "440340", pollTitle: "" });
 
-    expect(metadata.title).toBe("Quick Poll | 440340");
+    expect(metadata.title).toBe("bquickpoll | 440340");
     expect(metadata.description).toBe(appCopy.metadata.voterFallbackDescription("440340"));
     expect(metadata.openGraph).toMatchObject({
-      title: "Quick Poll | 440340",
+      title: "bquickpoll | 440340",
       description: appCopy.metadata.voterFallbackDescription("440340"),
     });
   });
@@ -94,7 +94,7 @@ describe("page metadata", () => {
 
     const metadata = await fetchVoterPageMetadata("440340");
 
-    expect(metadata.title).toBe("Quick Poll | 440340");
+    expect(metadata.title).toBe("bquickpoll | 440340");
     expect(metadata.description).toBe(appCopy.metadata.voterFallbackDescription("440340"));
   });
 

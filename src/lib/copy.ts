@@ -5,13 +5,13 @@ export const fontConfig = {
 
 export const appCopy = {
   language: "th",
-  productName: "Quick Poll",
+  productName: "bquickpoll",
   metadata: {
-    title: "Quick Poll | สร้างโพลสดทันที",
-    createTitle: "สร้างโพล | Quick Poll",
+    title: "bquickpoll | สร้างโพลสดทันที",
+    createTitle: "สร้างโพล | bquickpoll",
     hostTitle: (roomCode: string) => `Room | ${roomCode}`,
-    voterTitle: (roomCode: string) => `Quick Poll | ${roomCode}`,
-    voterFallbackDescription: (roomCode: string) => `Join room ${roomCode} and vote in Quick Poll.`,
+    voterTitle: (roomCode: string) => `bquickpoll | ${roomCode}`,
+    voterFallbackDescription: (roomCode: string) => `Join room ${roomCode} and vote in bquickpoll.`,
     description: "สร้างโพลสดและให้โหวตแบบเรียลไทม์โดยไม่ต้องล็อกอิน",
   },
   home: {
@@ -54,6 +54,8 @@ export const appCopy = {
     copyJoinLink: "คัดลอกลิงก์เข้าร่วม",
     linkCopied: "คัดลอกลิงก์แล้ว",
     linkCopyFailed: "คัดลอกลิงก์ไม่สำเร็จ",
+    downloadResultImage: "ดาวน์โหลดผลเป็นรูป",
+    downloadResultImageFailed: "ดาวน์โหลดรูปผลโหวตไม่สำเร็จ",
     winnerLabel: "ชนะ",
     roomLabel: "ห้อง",
     qrAltPrefix: "คิวอาร์โค้ดสำหรับห้อง",
@@ -68,7 +70,7 @@ export const appCopy = {
     },
   },
   voter: {
-    fallbackTitle: "Quick Poll",
+    fallbackTitle: "bquickpoll",
     loadingQuestion: "กำลังโหลด...",
     pollEnded: "โพลสิ้นสุดแล้ว",
     roomUnavailable: "ห้องนี้ไม่พร้อมใช้งาน",

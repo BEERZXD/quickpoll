@@ -36,7 +36,7 @@ export function hostHeaderLayoutClasses({
     return {
       header: "flex flex-col items-stretch gap-4",
       titleArea: "min-w-0 w-full",
-      actions: "order-first flex w-full flex-wrap justify-end gap-2",
+      actions: "order-first flex w-full flex-wrap items-start justify-between gap-2",
     };
   }
 

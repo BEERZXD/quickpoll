@@ -9,6 +9,12 @@ describe("page overflow layout", () => {
     expect(source).toContain("poll-text-wrap w-full text-3xl");
     expect(source).toContain("poll-text-wrap mt-3 w-full");
     expect(source).toContain('aside className="grid auto-rows-max content-start gap-5"');
+    expect(source).toContain("status-pill");
+    expect(source).toContain("{statusPill}");
+    expect(source).toContain("host-action-controls");
+    expect(source).toContain('aria-label={copy.downloadResultImage}');
+    expect(source).toContain("icon-button");
+    expect(source).toContain("<Download");
   });
 
   it("keeps the voter status and long result labels inside the panel", () => {
@@ -19,5 +25,7 @@ describe("page overflow layout", () => {
     expect(source).toContain('span className="shrink-0 whitespace-nowrap rounded-md');
     expect(source).toContain("mb-2 grid grid-cols-[minmax(0,1fr)_auto]");
     expect(source).toContain('div className="shrink-0 font-mono');
+    expect(source).not.toContain("downloadResultImage");
+    expect(source).not.toContain("status-pill");
   });
 });

@@ -32,7 +32,7 @@ describe("host stopped poll UI", () => {
     expect(layout.titleArea).toContain("w-full");
     expect(layout.actions).toContain("order-first");
     expect(layout.actions).toContain("w-full");
-    expect(layout.actions).toContain("justify-end");
+    expect(layout.actions).toContain("justify-between");
     expect(layout.actions).not.toContain("sm:w-auto");
   });
 
@@ -44,7 +44,7 @@ describe("host stopped poll UI", () => {
     expect(layout.titleArea).toContain("w-full");
     expect(layout.actions).toContain("order-first");
     expect(layout.actions).toContain("w-full");
-    expect(layout.actions).toContain("justify-end");
+    expect(layout.actions).toContain("justify-between");
     expect(layout.actions).not.toContain("sm:w-auto");
   });
 
