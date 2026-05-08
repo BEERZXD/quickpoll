@@ -9,8 +9,8 @@ export const appCopy = {
   metadata: {
     title: "Quick Poll | สร้างโพลสดทันที",
     createTitle: "สร้างโพล | Quick Poll",
-    hostTitle: (roomCode: string) => `ผู้สร้างห้อง ${roomCode} | Quick Poll`,
-    voterTitle: (roomCode: string) => `โหวตห้อง ${roomCode} | Quick Poll`,
+    hostTitle: (roomCode: string) => `Room | ${roomCode}`,
+    voterTitle: (roomCode: string) => `Room | ${roomCode}`,
     description: "สร้างโพลสดและให้โหวตแบบเรียลไทม์โดยไม่ต้องล็อกอิน",
   },
   home: {

@@ -11,13 +11,13 @@ describe("page metadata", () => {
     expect(metadata.title).not.toBe(appCopy.metadata.title);
   });
 
-  it("uses room-specific creator and voter tab titles", () => {
+  it("uses the same simple room-code tab title for creator and voter pages", () => {
     const hostMetadata = hostPageMetadata("440340");
     const voterMetadata = voterPageMetadata("440340");
 
-    expect(hostMetadata.title).toBe(appCopy.metadata.hostTitle("440340"));
-    expect(voterMetadata.title).toBe(appCopy.metadata.voterTitle("440340"));
-    expect(hostMetadata.title).not.toBe(voterMetadata.title);
+    expect(hostMetadata.title).toBe("Room | 440340");
+    expect(voterMetadata.title).toBe("Room | 440340");
+    expect(hostMetadata.title).toBe(voterMetadata.title);
     expect(hostMetadata.title).not.toBe(appCopy.metadata.title);
     expect(voterMetadata.title).not.toBe(appCopy.metadata.title);
   });
